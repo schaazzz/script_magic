@@ -159,6 +159,9 @@ def get_system_time():
 #--------------------------------------------------------------------------
 # Function: main      
 if __name__ == '__main__':
+   """
+   Script entry point.
+   """
    if(len(sys.argv) == 2) and (sys.argv[1] == 'set_shutdown_time_in_reg'):
       set_shutdown_timestamp()
       sys.exit(0)
