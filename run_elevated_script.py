@@ -78,7 +78,7 @@ def test():
    return ret_code
 
 #--------------------------------------------------------------------------
-# Function: main
+#--- Script entry point
 if __name__ == "__main__":
    """
    Script entry point.

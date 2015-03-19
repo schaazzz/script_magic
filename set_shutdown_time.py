@@ -57,14 +57,14 @@ __INDEX_SHUTDOWN_TIME = 9
 
 #--------------------------------------------------------------------------
 # Module Internal Variables
-# datetime object for reference time used in LDAP timestamps in Windows
+# Datetime object for reference time used in LDAP timestamps in Windows
 _epoch_start = datetime(year = 1601, month = 1, day = 1)
 
 #--------------------------------------------------------------------------
 # Function: set_shutdown_timestamp
 def set_shutdown_timestamp():
    """
-   Sets the shutdown timestamp in the registry to the current system time
+   Sets the shutdown timestamp in the registry to the current system time.
    """
 
    time_array = [None] * __TIMESTAMP_SIZE
@@ -157,7 +157,7 @@ def get_system_time():
    return current_timestamp, current_time.strftime('%d/%m/%Y, %H:%M:%S')
 
 #--------------------------------------------------------------------------
-# Function: main      
+#--- Script entry point
 if __name__ == '__main__':
    """
    Script entry point.
