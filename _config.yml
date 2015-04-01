@@ -1,0 +1,4 @@
+name: Script Magic
+markdown: redcarpet
+highlighter: pygments
+permalink: pretty
