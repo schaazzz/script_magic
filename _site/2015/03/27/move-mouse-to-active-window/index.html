@@ -42,20 +42,80 @@
     <p class="meta">Mar 27, 2015 • Shahzeb Ihsan</p>
 </header>
 
-<p>I have a weird 3 screen setup at work:
+<p>I have a weird 3 screen setup at work (don&#39;t ask me why):
 ...a docked laptop with a 27&quot; monitor to its right and a 19&quot; monitor <em>above</em> the 27&quot; monitor.</p>
 
 <p>I hate having to move the mouse from window to window when switching between windows using Alt-Tab, specially when the mouse has to be moved from the 1st screen to the 3rd screen.</p>
 
 <p>So... I created this simple script to move the mouse to the middle of the new window if Alt-Tab is being used.</p>
 
+<h2>Usage:</h2>
+
+<pre>
+python  mouse_to_active_win.py  True
+</pre>
+
+<p>The parameter (True or False) enables/disables debug prints.</p>
+
 <p><strong>Dependencies: pywin32, pyhook</strong></p>
 
 <h2>How it works</h2>
 
-<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="k">print</span> <span class="s">&quot;O HAI WORLD&quot;</span></code></pre></div>
+<p><u><strong>Setting the mouse position:</strong></u> We&#39;ll use the Windows <a href="https://msdn.microsoft.com/en-us/library/windows/desktop/ms648394%28v=vs.85%29.aspx">SetCursorPos</a> API to set the mouse position. PyWin32 provides bindings for Win32 API functions, so we just have to make the API call i.e.</p>
 
-<p>Ooga Booga...</p>
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="c"># Set cursor position to (100, 100)</span>
+<span class="n">win32api</span><span class="o">.</span><span class="n">SetCursorPos</span><span class="p">((</span><span class="mi">100</span><span class="p">,</span> <span class="mi">100</span><span class="p">))</span></code></pre></div>
+
+<p><u><strong>Getting the active (foreground) window:</strong></u> <a href="https://msdn.microsoft.com/en-us/library/windows/desktop/ms633505(v=vs.85).aspx">GetForegroundWindow</a> returns a handle to the currently active window. The <a href="https://msdn.microsoft.com/en-us/library/windows/desktop/ms633520(v=vs.85).aspx">GetWindowText</a> and <a href="https://msdn.microsoft.com/en-us/library/windows/desktop/ms633519(v=vs.85).aspx">GetWindowRect</a> APIs can be used to get the window title and dimensions, respectively.</p>
+
+<p><u><strong>Keyboard hook for Alt-Tab:</strong></u> This is where PyHook comes in; it wraps low-level mouse and keyboard hooks in the Windows Hooking API for use in Python applications.</p>
+
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="c"># Create the hook manager</span>
+<span class="n">hm</span> <span class="o">=</span> <span class="n">pyHook</span><span class="o">.</span><span class="n">HookManager</span><span class="p">()</span>
+
+<span class="c"># Register keyboard callback</span>
+<span class="n">hm</span><span class="o">.</span><span class="n">KeyUp</span> <span class="o">=</span> <span class="n">on_keyboard_event</span><span class="p">()</span>
+
+<span class="n">pythoncom</span><span class="o">.</span><span class="n">PumpMessages</span><span class="p">()</span>
+
+<span class="c"># Hook into keyboard events</span>
+<span class="n">hm</span><span class="o">.</span><span class="n">HookKeyBoard</span><span class="p">()</span>
+
+<span class="c"># The callback...</span>
+<span class="k">def</span> <span class="nf">on_keyboard_event</span><span class="p">(</span><span class="n">event</span><span class="p">):</span>
+   <span class="c"># Check for the Alt-Tab key combination (basically we check for the Tab key event with Alt held down)</span>
+   <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">Key</span> <span class="o">==</span> <span class="s">&#39;Tab&#39;</span> <span class="ow">and</span> <span class="n">event</span><span class="o">.</span><span class="n">Alt</span> <span class="o">!=</span> <span class="mi">0</span>
+      <span class="c"># Handle key event</span>
+      <span class="k">pass</span>
+
+   <span class="c"># Exit if Escape was pressed:</span>
+   <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">Key</span> <span class="o">==</span> <span class="s">&#39;Escape&#39;</span><span class="p">:</span>
+      <span class="c"># Quit the application</span>
+      <span class="k">pass</span>
+
+   <span class="k">return</span> <span class="bp">True</span></code></pre></div>
+
+<p><u><strong>Putting it all together:</strong></u> The function that sets the mouse position, <a href="https://github.com/schaazzz/script_magic/blob/master/mouse_to_active_win.py#L64">set_mouse_position</a>, is run in its own thread.</p>
+
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">thread</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span> <span class="o">=</span> <span class="n">set_mouse_position</span><span class="p">,</span> <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="n">debug</span><span class="p">,</span> <span class="p">))</span>
+<span class="n">thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span></code></pre></div>
+
+<p>The set_mouse_position function is more or less straight forward save for one minor peculiarity: we need to make sure that the &quot;Task Switching&quot; window has closed before we position the mouse:</p>
+
+<div class="highlight"><pre><code class="language-python" data-lang="python"><span class="c"># Wait for the &#39;Task Switching&#39; window to close</span>
+<span class="k">while</span><span class="p">(</span><span class="n">GetWindowText</span><span class="p">(</span><span class="n">GetForegroundWindow</span><span class="p">())</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s">&#39;-&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">==</span> <span class="s">&#39;Task Switching&#39;</span><span class="p">):</span>
+    <span class="k">pass</span>
+<span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.25</span><span class="p">)</span>   <span class="c"># --&gt; Slight delay before continuing...</span></code></pre></div>
+
+<p>The rest of the implementation is self-explanatory, on_keyboard_event posts Alt-Tab and Escape key events to the mouse positioning thread.</p>
+
+<p>If you don&#39;t want to download or clone the whole repository, you can view the complete source for this file on GitHub <a href="https://github.com/schaazzz/script_magic/blob/master/mouse_to_active_win.py">here</a> or download the file <a href="https://raw.githubusercontent.com/schaazzz/script_magic/master/mouse_to_active_win.py">here</a></p>
+
+<h2>To Do List:</h2>
+
+<ul>
+<li>Use Ctrl-C to exit the script instead of the Escape key</li>
+</ul>
 
 
       </section>
