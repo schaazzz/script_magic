@@ -2,3 +2,4 @@ name: Script Magic
 markdown: redcarpet
 highlighter: pygments
 permalink: pretty
+excerpt_separator: <!--more-->

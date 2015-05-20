@@ -4,6 +4,8 @@ title: Move Mouse to Active Window
 author: Shahzeb Ihsan
 ---
 
+**Dependencies: pywin32, pyhook**
+
 I have a weird 3 screen setup at work (don't ask me why):
 ...a docked laptop with a 27" monitor to its right and a 19" monitor *above* the 27" monitor.
 
@@ -13,12 +15,12 @@ So... I created this simple script to move the mouse to the middle of the new wi
 
 ## Usage:
 <pre>
-python  mouse_to_active_win.py  True
+$ python  mouse_to_active_win.py  True
 </pre>
 
 The parameter (True or False) enables/disables debug prints.
 
-**Dependencies: pywin32, pyhook**
+<!--more-->
 
 ## How it works
 <u>**Setting the mouse position:**</u> We'll use the Windows [SetCursorPos](https://msdn.microsoft.com/en-us/library/windows/desktop/ms648394%28v=vs.85%29.aspx) API to set the mouse position. PyWin32 provides bindings for Win32 API functions, so we just have to make the API call i.e.

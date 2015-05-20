@@ -42,6 +42,78 @@
     <p class="meta">May 19, 2015 • Shahzeb Ihsan</p>
 </header>
 
+<p><strong>Dependencies: pywin32, wmi</strong></p>
+
+<p>I use this script on my laptop to switch from DHCP (at work) to a static IP addressing scheme (at home) and vice versa.</p>
+
+<h2>Usage:</h2>
+
+<pre>
+$ python  set_nice_properties.py  True
+
+Listing interfaces, filters: {IPEnabled = False}
+Please wait, this might take a few seconds...
+
+Index   Interface
+=====   =========
+[7]     Intel(R) 82579LM Gigabit Network Connection
+[15]    Intel(R) Centrino(R) Advanced-N 6205
+[23]    Remote NDIS based Internet Sharing Device
+[29]    VirtualBox Host-Only Ethernet Adapter
+</pre>
+
+<p>Select an interface index from the listed options when prompted and specify if you want to configure this interface.
+&lt;!--more--&gt;
+(Note: IP address, domain and DNS information has been replaced with &quot;---.---.---.---&quot;)</p>
+
+<pre>
+Select interface (index): 15
+
+Selected NIC:  Intel(R) Centrino(R) Advanced-N 6205
+...DHCP Enabled:        True
+...IP Address:          ---.---.---.---
+...Default IP Gateway:  ---.---.---.---
+...Default DNS Server:  ---.---.---.---
+
+Would you like to configure this interface [Y/N]: y
+</pre>
+
+<p>If you enter &quot;N&quot; above, the script will exit. &quot;Y&quot; will lead you through a series of self-explanatory prompts</p>
+
+<pre>
+Disable DHCP [Y/N]? y
+New IP Address: 192.168.1.10
+Subnet Mask: 255.255.255.0
+Default Gateway: 192.168.1.1
+Default DNS: 192.168.1.1
+</pre>
+
+<p>In case DHCP is disabled and you want to enable it, the output will look something like this:</p>
+
+<pre>
+Selected NIC:  Intel(R) Centrino(R) Advanced-N 6205
+...DHCP Enabled:        False
+...IP Address:          ---.---.---.---
+...Default IP Gateway:  ---.---.---.---
+...Default DNS Server:  ---.---.---.---
+
+Would you like to configure this interface [Y/N]: y
+Enable DHCP [Y/N]? y
+</pre>
+
+<h2>How it works</h2>
+
+<p>The WMI Python module does most of the heavy lifting for us i.e. interfacing to the Windows Management Interface. The entire script depends on the following Windows <a href="https://msdn.microsoft.com/en-us/library/aa394217%28v=vs.85%29.aspx">Win32_NetworkAdapterConfiguration</a> methods:</p>
+
+<ul>
+<li><a href="https://msdn.microsoft.com/en-us/library/aa390383%28v=vs.85%29.aspx">EnableStatic</a></li>
+<li><a href="https://msdn.microsoft.com/en-us/library/aa393301%28v=vs.85%29.aspx">SetGateways</a></li>
+<li><a href="https://msdn.microsoft.com/en-us/library/aa393295%28v=vs.85%29.aspx">SetDNSServerSearchOrder</a></li>
+<li><a href="https://msdn.microsoft.com/en-us/library/aa390378(v=vs.85).aspx">EnableDHCP</a></li>
+<li><a href="https://msdn.microsoft.com/en-us/library/aa393295(v=vs.85).aspx">SetDNSServerSearchOrder</a></li>
+</ul>
+
+<p>Other implementation details are straight forward. The <a href="https://github.com/schaazzz/script_magic/blob/master/helpers.py">get_validated_input</a> is used to get validated user input based on the specified regular expression.</p>
 
 
       </section>
