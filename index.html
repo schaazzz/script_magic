@@ -10,7 +10,7 @@ This is a repository of (mostly) self-contained scripts that accomplish various 
   {% for post in site.posts %}
     <dt>---<br>
     <p class="authorline">{{ post.date | date: "%b %-d, %Y" }}{% if post.author %} • {{ post.author }}{% endif %}</p>
-    <h3><a class="post-link" href="{{ post.url }}">{{ post.title }}</a></h3>
+    <h3><a class="post-link" href="{{site.baseurl}}{{ post.url }}">{{ post.title }}</a></h3>
     </dt>
     <dd>{{ post.excerpt }}</dd><br/>
   {% endfor %}

@@ -1,5 +1,6 @@
 name: Script Magic
 markdown: redcarpet
 highlighter: pygments
-permalink: script_magic/:categories/:year/:month/:day/:title/ 
+baseurl: /script_magic
+permalink: pretty
 excerpt_separator: <!--more-->
