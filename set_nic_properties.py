@@ -53,14 +53,17 @@ from helpers import *
 print '\r\nListing interfaces, filters: {IPEnabled = False}'
 print 'Please wait, this might take a few seconds...'
 
+# Get NIC configurations...
 nic_configs = wmi.WMI().Win32_NetworkAdapterConfiguration(IPEnabled = True)
 
 print '\r\nIndex\tInterface'
 print '=====\t=========\r'
 
+# Print all configus
 for nic in nic_configs:
     print '[%d]\t%s' % (nic.Index, nic.Description)
 
+# Ask the user to select an interface...
 index = int(get_validated_input('\r\nSelect interface (index): ', r'^\d+$', True)[1])
 selected_nic = None
 for nic in nic_configs:
@@ -68,6 +71,7 @@ for nic in nic_configs:
         selected_nic = nic
         print nic
 
+# Print the selected configuration
 if selected_nic:
     print '\r\nSelected NIC: ', selected_nic.Description
     print '...DHCP Enabled:\t', selected_nic.DHCPEnabled
@@ -75,16 +79,19 @@ if selected_nic:
     print '...Default IP Gateway:\t', selected_nic.DefaultIPGateway[0]
     print '...Default DNS Server:\t', selected_nic.DNSServerSearchOrder[0]
 
+    # Initialize configurable parameters
     dhcp_enabled = selected_nic.DHCPEnabled
     ip_address = selected_nic.IPAddress[0]
     default_dns = selected_nic.DNSServerSearchOrder[0]
     default_gateway = selected_nic.DefaultIPGateway[0]
 
+    # Ask the user if this interface needs to be configured...
     configure = get_validated_input('\r\nWould you like to configure this interface [Y/N]: ',
                                     r'^(y|Y|n|N)$',
                                     True)[1].lower()
 
     if(configure == 'y'):
+        # Configure DHCP based on user input
         if(dhcp_enabled):
             dhcp_toggle = get_validated_input('Disable DHCP [Y/N]? ', r'^y|Y|n|N$', True)[1].lower()
         else:
@@ -93,17 +100,22 @@ if selected_nic:
         if(dhcp_toggle == 'y'):
             dhcp_enabled= not dhcp_enabled
 
+        # If DHCP has been disabled, get the interface's IP address, default gateway,
+        # default DNS and subnet mask
         if(not dhcp_enabled):
+            # Regular expression for verifying IP address input
             regex_ip = r'^(2[0-5][0-4]|1[0-9][0-9]|[0-9][0-9]|[1-9])\.'    \
                         '(2[0-5][0-4]|1[0-9][0-9]|[0-9][0-9]|[0-9])\.'     \
                         '(2[0-5][0-4]|1[0-9][0-9]|[0-9][0-9]|[0-9])\.'     \
                         '(2[0-5][0-4]|1[0-9][0-9]|[0-9][0-9]|[0-9])$'      \
 
+            # Regular expression for verifying subnet mask input
             regex_subnet_mask = r'^(2[4-5][0-5]|1[0-9][0-9]|[0-9][0-9]|[1-9])\.'    \
                                  '(2[0-5][0-5]|1[0-9][0-9]|[0-9][0-9]|[0-9])\.'     \
                                  '(2[0-5][0-5]|1[0-9][0-9]|[0-9][0-9]|[0-9])\.'     \
                                  '(2[0-5][0-5]|1[0-9][0-9]|[0-9][0-9]|[0-9])$'      \
 
+            # Get the required information from the user
             ip_address = unicode(get_validated_input('New IP Address: ', regex_ip, True)[1],'utf-8')
             subnet_mask = unicode(get_validated_input('Subnet Mask: ', regex_subnet_mask, True)[1],'utf-8')
             default_gateway = unicode(get_validated_input('Default Gateway: ', regex_ip, True)[1],'utf-8')
@@ -114,6 +126,7 @@ if selected_nic:
             result2 = selected_nic.SetDNSServerSearchOrder(DNSServerSearchOrder = [default_dns])
 
         else:
+            # DHCP has to be enabled, configure accordingly
             result0 = selected_nic.EnableDHCP()
             result1 = selected_nic.SetDNSServerSearchOrder()
 
