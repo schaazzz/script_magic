@@ -33,7 +33,7 @@
 
 #--------------------------------------------------------------------------
 # Module Imports
-import time, sys, threading
+import time, sys, threading, signal
 import pyHook, win32con, pythoncom
 from win32gui import GetForegroundWindow, GetWindowText, GetWindowRect
 from win32api import SetCursorPos, GetCurrentThreadId, PostThreadMessage
@@ -53,6 +53,7 @@ from win32api import SetCursorPos, GetCurrentThreadId, PostThreadMessage
 #--------------------------------------------------------------------------
 # Module Internal Variables
 # Initialize events for the "set_mouse_position" thread
+sigint_rcvd = False
 event_switch = threading.Event()
 event_quit = threading.Event()
 
@@ -109,6 +110,18 @@ def set_mouse_position(show_log):
             event_switch.clear()
 
 #--------------------------------------------------------------------------
+# Function: sigint_handler
+def sigint_handler(signal, frame):
+    """
+    SIGINT handler
+
+    @param int signal: Signal number
+    @param Frame frame: Frame object
+    """
+    global sigint_rcvd
+    sigint_rcvd = True
+
+#--------------------------------------------------------------------------
 # Function: on_keyboard_event
 def on_keyboard_event(event):
     """
@@ -119,13 +132,14 @@ def on_keyboard_event(event):
 
     global event_switch, event_quit
     global main_thread_id
+    global sigint_rcvd
 
     # Check for the Alt-Tab key combination
     if event.Key == 'Tab' and event.Alt != 0:
         event_switch.set()
 
-    # Exit if Escape was preseed
-    if event.Key == 'Escape':
+    # Exit if SIGINT was received
+    if sigint_rcvd:
         event_quit.set()
         PostThreadMessage(main_thread_id, win32con.WM_QUIT, 0, 0);
 
@@ -135,7 +149,7 @@ def on_keyboard_event(event):
 #--- Script entry point
 if __name__ == '__main__':
     """
-    Script entry point.
+    Script entry point
     """
 
     debug = False
@@ -148,6 +162,9 @@ if __name__ == '__main__':
 
     # Hook into the keyboard events
     hm.HookKeyboard()
+
+    # Install the SIGINT handler
+    signal.signal(signal.SIGINT, sigint_handler)
 
     # Create the "set_mouse_position" thread
     if(len(sys.argv) > 1):
