@@ -10,7 +10,7 @@ I use this script on my laptop to switch from DHCP (at work) to a static IP addr
 
 ## Usage:
 <pre>
-$ python  set_nice_properties.py  True
+$ python  set_nic_properties.py  True
 
 Listing interfaces, filters: {IPEnabled = False}
 Please wait, this might take a few seconds...
@@ -73,3 +73,5 @@ The WMI Python module does most of the heavy lifting for us i.e. interfacing to 
 - [SetDNSServerSearchOrder](https://msdn.microsoft.com/en-us/library/aa393295(v=vs.85).aspx)
 
 Other implementation details are straight forward. The [get\_validated\_input](https://github.com/schaazzz/script_magic/blob/master/helpers.py) is used to get validated user input based on the specified regular expression.
+
+If you don't want to download or clone the whole repository, you can view the complete source for this script on GitHub [here](https://github.com/schaazzz/script_magic/blob/master/set_nic_properties.py) or download the file [here](https://raw.githubusercontent.com/schaazzz/script_magic/master/set_nic_properties.py)

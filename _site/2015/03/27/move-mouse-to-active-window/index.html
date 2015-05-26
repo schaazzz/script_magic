@@ -85,19 +85,18 @@ $ python  mouse_to_active_win.py  True
 
 <span class="c"># The callback...</span>
 <span class="k">def</span> <span class="nf">on_keyboard_event</span><span class="p">(</span><span class="n">event</span><span class="p">):</span>
-   <span class="c"># Check for the Alt-Tab key combination (basically we check for the Tab key event with Alt held down)</span>
-   <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">Key</span> <span class="o">==</span> <span class="s">&#39;Tab&#39;</span> <span class="ow">and</span> <span class="n">event</span><span class="o">.</span><span class="n">Alt</span> <span class="o">!=</span> <span class="mi">0</span>
-      <span class="c"># Handle key event</span>
-      <span class="k">pass</span>
+    <span class="c"># Check for the Alt-Tab key combination (basically we check for the Tab key event with Alt held down)</span>
+    <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">Key</span> <span class="o">==</span> <span class="s">&#39;Tab&#39;</span> <span class="ow">and</span> <span class="n">event</span><span class="o">.</span><span class="n">Alt</span> <span class="o">!=</span> <span class="mi">0</span>
+        <span class="c"># Handle key event</span>
+        <span class="k">pass</span>
 
-   <span class="c"># Exit if Escape was pressed:</span>
-   <span class="k">if</span> <span class="n">event</span><span class="o">.</span><span class="n">Key</span> <span class="o">==</span> <span class="s">&#39;Escape&#39;</span><span class="p">:</span>
-      <span class="c"># Quit the application</span>
-      <span class="k">pass</span>
+    <span class="c"># Exit if SIGINT was received</span>
+    <span class="k">if</span> <span class="n">sigint_rcvd</span><span class="p">:</span>
+        <span class="k">pass</span>
 
-   <span class="k">return</span> <span class="bp">True</span></code></pre></div>
+    <span class="k">return</span> <span class="bp">True</span></code></pre></div>
 
-<p><u><strong>Putting it all together:</strong></u> The function that sets the mouse position, <a href="https://github.com/schaazzz/script_magic/blob/master/mouse_to_active_win.py#L64">set_mouse_position</a>, is run in its own thread.</p>
+<p><u><strong>Putting it all together:</strong></u> The function that sets the mouse position, <strong>set_mouse_position</strong>, is run in its own thread.</p>
 
 <div class="highlight"><pre><code class="language-python" data-lang="python"><span class="n">thread</span> <span class="o">=</span> <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">(</span><span class="n">target</span> <span class="o">=</span> <span class="n">set_mouse_position</span><span class="p">,</span> <span class="n">args</span> <span class="o">=</span> <span class="p">(</span><span class="n">debug</span><span class="p">,</span> <span class="p">))</span>
 <span class="n">thread</span><span class="o">.</span><span class="n">start</span><span class="p">()</span></code></pre></div>
@@ -109,15 +108,9 @@ $ python  mouse_to_active_win.py  True
     <span class="k">pass</span>
 <span class="n">time</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="mf">0.25</span><span class="p">)</span>   <span class="c"># --&gt; Slight delay before continuing...</span></code></pre></div>
 
-<p>The rest of the implementation is self-explanatory, on_keyboard_event posts Alt-Tab and Escape key events to the mouse positioning thread.</p>
+<p>The rest of the implementation is self-explanatory, <strong>on_keyboard_event</strong> posts a switch event on Alt-Tab and a quit event on SIGINT (Ctrl-C). A signal handler is installed for handling SIGINT (Ctrl-C).</p>
 
-<p>If you don&#39;t want to download or clone the whole repository, you can view the complete source for this file on GitHub <a href="https://github.com/schaazzz/script_magic/blob/master/mouse_to_active_win.py">here</a> or download the file <a href="https://raw.githubusercontent.com/schaazzz/script_magic/master/mouse_to_active_win.py">here</a></p>
-
-<h2>To Do List:</h2>
-
-<ul>
-<li>Use Ctrl-C to exit the script instead of the Escape key</li>
-</ul>
+<p>If you don&#39;t want to download or clone the whole repository, you can view the complete source for this script on GitHub <a href="https://github.com/schaazzz/script_magic/blob/master/mouse_to_active_win.py">here</a> or download the file <a href="https://raw.githubusercontent.com/schaazzz/script_magic/master/mouse_to_active_win.py">here</a></p>
 
 
       </section>

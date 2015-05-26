@@ -48,20 +48,19 @@ hm.HookKeyBoard()
 
 # The callback...
 def on_keyboard_event(event):
-   # Check for the Alt-Tab key combination (basically we check for the Tab key event with Alt held down)
-   if event.Key == 'Tab' and event.Alt != 0
-      # Handle key event
-      pass
+    # Check for the Alt-Tab key combination (basically we check for the Tab key event with Alt held down)
+    if event.Key == 'Tab' and event.Alt != 0
+        # Handle key event
+        pass
 
-   # Exit if Escape was pressed:
-   if event.Key == 'Escape':
-      # Quit the application
-      pass
+    # Exit if SIGINT was received
+    if sigint_rcvd:
+        pass
 
-   return True
+    return True
 {% endhighlight %}
 
-<u>**Putting it all together:**</u> The function that sets the mouse position, [set\_mouse\_position](https://github.com/schaazzz/script_magic/blob/master/mouse_to_active_win.py#L64), is run in its own thread.
+<u>**Putting it all together:**</u> The function that sets the mouse position, **set\_mouse\_position**, is run in its own thread.
 
 {% highlight python %}
 thread = threading.Thread(target = set_mouse_position, args = (debug, ))
@@ -77,9 +76,6 @@ while(GetWindowText(GetForegroundWindow()).split('-')[-1] == 'Task Switching'):
 time.sleep(0.25)   # --> Slight delay before continuing...
 {% endhighlight %}
 
-The rest of the implementation is self-explanatory, on\_keyboard\_event posts Alt-Tab and Escape key events to the mouse positioning thread.
+The rest of the implementation is self-explanatory, **on\_keyboard\_event** posts a switch event on Alt-Tab and a quit event on SIGINT (Ctrl-C). A signal handler is installed for handling SIGINT (Ctrl-C).
 
-If you don't want to download or clone the whole repository, you can view the complete source for this file on GitHub [here](https://github.com/schaazzz/script_magic/blob/master/mouse_to_active_win.py) or download the file [here](https://raw.githubusercontent.com/schaazzz/script_magic/master/mouse_to_active_win.py)
-
-## To Do List:
-- Use Ctrl-C to exit the script instead of the Escape key
+If you don't want to download or clone the whole repository, you can view the complete source for this script on GitHub [here](https://github.com/schaazzz/script_magic/blob/master/mouse_to_active_win.py) or download the file [here](https://raw.githubusercontent.com/schaazzz/script_magic/master/mouse_to_active_win.py)
