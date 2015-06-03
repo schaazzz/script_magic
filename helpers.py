@@ -51,7 +51,7 @@ import re
 
 #--------------------------------------------------------------------------
 # Function: get_validated_input
-def get_validated_input(prompt, regex_str, loop_till_valid = False):
+def get_validated_input(prompt, regex_str = '^.*?$', loop_till_valid = False):
     """
     Get validated user input.
 
@@ -62,10 +62,11 @@ def get_validated_input(prompt, regex_str, loop_till_valid = False):
     """
     is_input_valid = False
     search_result = None
-
+    loop_once = True
     regex = re.compile(regex_str)
 
-    while loop_till_valid:
+    while loop_till_valid or loop_once:
+        loop_once = False
         user_input = raw_input(prompt)
         match_obj = regex.search(user_input)
 
