@@ -150,7 +150,7 @@ for n in range(len(page_large)):
     parser = FlickrDwnldPgParser()
     parser.feed(html)
     url_large.append(parser.get_url())
-print 'done!'
+print ' ...... done!'
 
 for n in range(len(page_thumbnails)):
     print_progress_bar(
@@ -164,11 +164,12 @@ for n in range(len(page_thumbnails)):
     parser = FlickrDwnldPgParser()
     parser.feed(html)
     url_thumbnails.append(parser.get_url())
-print 'done!'
+print ' ...... done!'
 
 for n in range(len(url_large)):
     jssor_div_output.write('    <div>\r\n')
-    jssor_div_output.write('        <img u=\"image\" src=\"' + url_large[n] + '\" />\r\n')
+    #jssor_div_output.write('        <img u=\"image\" src=\"' + url_large[n] + '\" />\r\n')
+    jssor_div_output.write('        <a href=\"https://www.flickr.com/photos/schaazzz/'  + photo_ids[n] + '\"><img u=\"image\" src=\"' + url_large[n] + '\" /></a>\r\n')
     jssor_div_output.write('        <div u=\"thumb\">\r\n')
     jssor_div_output.write('            <div style=\"width: 100%; height: 100%; background-image: url(' + url_thumbnails[n] + '); background-position: center center; background-repeat: no-repeat; \">\r\n')
     jssor_div_output.write('            </div>\r\n')
