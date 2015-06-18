@@ -1,14 +1,58 @@
+#--------------------------------------------------------------------------
+# The MIT License (MIT)
+#
+# Copyright (c) 2015 Shahzeb Ihsan
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy
+# of this software and associated documentation files (the "Software"), to deal
+# in the Software without restriction, including without limitation the rights
+# to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+# copies of the Software, and to permit persons to whom the Software is
+# furnished to do so, subject to the following conditions:
+#
+# The above copyright notice and this permission notice shall be included in all
+# copies or substantial portions of the Software.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+# IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+# FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+# AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+# LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+# OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+# SOFTWARE.
+
+#--------------------------------------------------------------------------
+## @file    get_photo_urls_from_flickr_set.py
+#  @brief   Retrieves image & thumbnail URLs from the specified set and saves
+#           them in the specified file in a format that can be used directly
+#           in a JSSOR image slider's HTML code.
+#
+#  @author  Shahzeb Ihsan [shahzeb.ihsan@gmail.com]
+#  @version 0.1
+
+#--------------------------------------------------------------------------
+# Module Imports
 import os, sys, urllib2
 import flickrapi
 from HTMLParser import HTMLParser
 
-jssor_div_output = None
+#--------------------------------------------------------------------------
+# Module Global Attributes
+# --- N/A
 
+#--------------------------------------------------------------------------
+# Module Global Variables
+# --- N/A
+
+#--------------------------------------------------------------------------
+# Module Local Attributes
 api_key = 'ea5bf9b1668161e323060ad2d91accb1'
 api_secret = '17b2e7c7b5475b8b'
-
 set_id = '72157622960195643'
 
+#--------------------------------------------------------------------------
+# Module Internal Variables
+jssor_div_output = None
 photo_ids = []
 page_large = []
 page_thumbnails = []
