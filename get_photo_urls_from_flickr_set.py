@@ -59,28 +59,26 @@ page_thumbnails = []
 url_large = []
 url_thumbnails = []
 
-def print_progress_bar(n, total, step = 1, msg = ''):
-    str = '' + msg
-
-    percentage = (100 * n) / total
-
-    if n == total - 1:
-        percentage = 100
-
-    for p in range(percentage):
-        if p == 0:
-            str += '[%(n)3d%%] ' % {'n': percentage}
-
-        if (p % step) == 0:
-            str += '='
-
-    sys.stdout.write('\r' + str)
-    sys.stdout.flush()
-
+#--------------------------------------------------------------------------
+# Function: print_progress_bar
 class FlickrDwnldPgParser(HTMLParser):
+    """
+    Extending the HTMLParser class to parse the image download page returned by
+    Flickr. Searches for the image link in the div "allsizes-photo".
+
+    @param n int: Current step
+    @param total int: Total number of steps
+    @param step int: Number of "steps" after which to increment the progress bar
+    @param msg String: Text to be printed at the "head" of the progress bar
+    """
     div_found = False
     url = ''
+
+    #----------------------------------------------------------------------
     def handle_starttag(self, tag, attrs):
+        """
+        Over ridden start tag function, this is all we need.
+        """
         if tag == 'div':
             if 'allsizes-photo' in attrs[0][1]:
                 self.div_found = True
@@ -89,10 +87,51 @@ class FlickrDwnldPgParser(HTMLParser):
             self.url = attrs[0][1]
             self.div_found = False
 
+    #----------------------------------------------------------------------
     def get_url(self):
+        """
+        Returns the URL extracted from the Flickr page
+        """
         return self.url
 
+#--------------------------------------------------------------------------
+# Function: print_progress_bar
+def print_progress_bar(n, total, step = 1, msg = ''):
+    """
+    Prints a progress bar in the console.
+
+    @param n int: Current step
+    @param total int: Total number of steps
+    @param step int: Number of "steps" after which to increment the progress bar
+    @param msg String: Text to be printed at the "head" of the progress bar
+    """
+    str = '' + msg
+
+    # Calculate the current percentage
+    percentage = (100 * n) / total
+
+    # Takes care of "off-by-one erros (OBOEs)"
+    if n == total - 1:
+        percentage = 100
+
+    # Create the progress bar...
+    for p in range(percentage):
+        if p == 0:
+            str += '[%(n)3d%%] ' % {'n': percentage}
+
+        if (p % step) == 0:
+            str += '='
+
+    # Clear the previously display progress bar and print the new one...
+    sys.stdout.write('\r' + str)
+    sys.stdout.flush()
+
+#--------------------------------------------------------------------------
+if __name__ == '__main__':
+
 print '\r\n----------------------------------------------------------------'
+
+# Open the output file
 if len(sys.argv) > 1:
     jssor_div_output = open(os.path.join('', sys.argv[1]), 'wr')
 else:
@@ -100,11 +139,13 @@ else:
     sys.stderr.flush()
     sys.exit(-1)
 
+# Initialize the Flickr API
 print 'Initializing Flickr API ....... ',
 sys.stdout.flush()
 flickr = flickrapi.FlickrAPI(api_key, api_secret, format='etree')
 print 'done!'
 
+# We'll use the iterator returned by walk_set() to read all photo IDs in the specified set
 print 'Get Flickr set with id = ' + set_id +  '....... ',
 sys.stdout.flush()
 set = flickr.walk_set(set_id)
@@ -116,7 +157,10 @@ for photo in set:
     photo_ids.append(photo.get('id'))
 print 'done!'
 
+# Re-initialize the Flickr API (this time we request responses in parsed JSON format)
 flickr = flickrapi.FlickrAPI(api_key, api_secret, format='parsed-json')
+
+# Now we'll retrieve photo sizes for all photo IDs and filter "Large" & "Thumbnail"
 for n in range(len(photo_ids)):
     print_progress_bar(
                 n,
@@ -126,18 +170,19 @@ for n in range(len(photo_ids)):
 
     sizes = flickr.photos.getSizes(photo_id = photo_ids[n])
 
+    # Iterate through all sizes in the parsed JSON respones
     for m in range(len(sizes['sizes']['size'])):
         label = sizes['sizes']['size'][m]['label']
         url = sizes['sizes']['size'][m]['url']
 
-        if (label == 'Large'):
+        if label == 'Large':
             page_large.append(url)
 
         if label == 'Thumbnail':
             page_thumbnails.append(url)
-
 print ' ...... done!'
 
+# Retrieve and parse pages for the "Large" image
 for n in range(len(page_large)):
     print_progress_bar(
                 n,
@@ -152,6 +197,7 @@ for n in range(len(page_large)):
     url_large.append(parser.get_url())
 print ' ...... done!'
 
+# Retrieve and parse pages for the "Thumbnail" image
 for n in range(len(page_thumbnails)):
     print_progress_bar(
                 n,
@@ -166,9 +212,9 @@ for n in range(len(page_thumbnails)):
     url_thumbnails.append(parser.get_url())
 print ' ...... done!'
 
+# Create the HTML output for JSSOR slides
 for n in range(len(url_large)):
     jssor_div_output.write('    <div>\r\n')
-    #jssor_div_output.write('        <img u=\"image\" src=\"' + url_large[n] + '\" />\r\n')
     jssor_div_output.write('        <a href=\"https://www.flickr.com/photos/schaazzz/'  + photo_ids[n] + '\"><img u=\"image\" src=\"' + url_large[n] + '\" /></a>\r\n')
     jssor_div_output.write('        <div u=\"thumb\">\r\n')
     jssor_div_output.write('            <div style=\"width: 100%; height: 100%; background-image: url(' + url_thumbnails[n] + '); background-position: center center; background-repeat: no-repeat; \">\r\n')
@@ -176,5 +222,6 @@ for n in range(len(url_large)):
     jssor_div_output.write('        </div>\r\n')
     jssor_div_output.write('    </div>\r\n')
 
+# Close the output file
 jssor_div_output.close()
 print '----------------------------------------------------------------\r\n'
