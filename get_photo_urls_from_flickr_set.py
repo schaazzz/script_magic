@@ -129,99 +129,99 @@ def print_progress_bar(n, total, step = 1, msg = ''):
 #--------------------------------------------------------------------------
 if __name__ == '__main__':
 
-print '\r\n----------------------------------------------------------------'
+    print '\r\n----------------------------------------------------------------'
 
-# Open the output file
-if len(sys.argv) > 1:
-    jssor_div_output = open(os.path.join('', sys.argv[1]), 'wr')
-else:
-    sys.stderr.write('Error! No output file specified...')
-    sys.stderr.flush()
-    sys.exit(-1)
+    # Open the output file
+    if len(sys.argv) > 1:
+        jssor_div_output = open(os.path.join('', sys.argv[1]), 'wr')
+    else:
+        sys.stderr.write('Error! No output file specified...')
+        sys.stderr.flush()
+        sys.exit(-1)
 
-# Initialize the Flickr API
-print 'Initializing Flickr API ....... ',
-sys.stdout.flush()
-flickr = flickrapi.FlickrAPI(api_key, api_secret, format='etree')
-print 'done!'
+    # Initialize the Flickr API
+    print 'Initializing Flickr API ....... ',
+    sys.stdout.flush()
+    flickr = flickrapi.FlickrAPI(api_key, api_secret, format='etree')
+    print 'done!'
 
-# We'll use the iterator returned by walk_set() to read all photo IDs in the specified set
-print 'Get Flickr set with id = ' + set_id +  '....... ',
-sys.stdout.flush()
-set = flickr.walk_set(set_id)
-print 'done!'
+    # We'll use the iterator returned by walk_set() to read all photo IDs in the specified set
+    print 'Get Flickr set with id = ' + set_id +  '....... ',
+    sys.stdout.flush()
+    set = flickr.walk_set(set_id)
+    print 'done!'
 
-print 'Read all photo IDs .......',
-sys.stdout.flush()
-for photo in set:
-    photo_ids.append(photo.get('id'))
-print 'done!'
+    print 'Read all photo IDs .......',
+    sys.stdout.flush()
+    for photo in set:
+        photo_ids.append(photo.get('id'))
+    print 'done!'
 
-# Re-initialize the Flickr API (this time we request responses in parsed JSON format)
-flickr = flickrapi.FlickrAPI(api_key, api_secret, format='parsed-json')
+    # Re-initialize the Flickr API (this time we request responses in parsed JSON format)
+    flickr = flickrapi.FlickrAPI(api_key, api_secret, format='parsed-json')
 
-# Now we'll retrieve photo sizes for all photo IDs and filter "Large" & "Thumbnail"
-for n in range(len(photo_ids)):
-    print_progress_bar(
-                n,
-                len(photo_ids),
-                2,
-                'Retrieving URLs for image pages: ')
+    # Now we'll retrieve photo sizes for all photo IDs and filter "Large" & "Thumbnail"
+    for n in range(len(photo_ids)):
+        print_progress_bar(
+                    n,
+                    len(photo_ids),
+                    2,
+                    'Retrieving URLs for image pages: ')
 
-    sizes = flickr.photos.getSizes(photo_id = photo_ids[n])
+        sizes = flickr.photos.getSizes(photo_id = photo_ids[n])
 
-    # Iterate through all sizes in the parsed JSON respones
-    for m in range(len(sizes['sizes']['size'])):
-        label = sizes['sizes']['size'][m]['label']
-        url = sizes['sizes']['size'][m]['url']
+        # Iterate through all sizes in the parsed JSON respones
+        for m in range(len(sizes['sizes']['size'])):
+            label = sizes['sizes']['size'][m]['label']
+            url = sizes['sizes']['size'][m]['url']
 
-        if label == 'Large':
-            page_large.append(url)
+            if label == 'Large':
+                page_large.append(url)
 
-        if label == 'Thumbnail':
-            page_thumbnails.append(url)
-print ' ...... done!'
+            if label == 'Thumbnail':
+                page_thumbnails.append(url)
+    print ' ...... done!'
 
-# Retrieve and parse pages for the "Large" image
-for n in range(len(page_large)):
-    print_progress_bar(
-                n,
-                len(page_large),
-                2,
-                'Retrieving image URLs (large): ')
+    # Retrieve and parse pages for the "Large" image
+    for n in range(len(page_large)):
+        print_progress_bar(
+                    n,
+                    len(page_large),
+                    2,
+                    'Retrieving image URLs (large): ')
 
-    response = urllib2.urlopen(page_large[n])
-    html = response.read()
-    parser = FlickrDwnldPgParser()
-    parser.feed(html)
-    url_large.append(parser.get_url())
-print ' ...... done!'
+        response = urllib2.urlopen(page_large[n])
+        html = response.read()
+        parser = FlickrDwnldPgParser()
+        parser.feed(html)
+        url_large.append(parser.get_url())
+    print ' ...... done!'
 
-# Retrieve and parse pages for the "Thumbnail" image
-for n in range(len(page_thumbnails)):
-    print_progress_bar(
-                n,
-                len(page_thumbnails),
-                2,
-                'Retrieving image URLs (thumbnails): ')
+    # Retrieve and parse pages for the "Thumbnail" image
+    for n in range(len(page_thumbnails)):
+        print_progress_bar(
+                    n,
+                    len(page_thumbnails),
+                    2,
+                    'Retrieving image URLs (thumbnails): ')
 
-    response = urllib2.urlopen(page_thumbnails[n])
-    html = response.read()
-    parser = FlickrDwnldPgParser()
-    parser.feed(html)
-    url_thumbnails.append(parser.get_url())
-print ' ...... done!'
+        response = urllib2.urlopen(page_thumbnails[n])
+        html = response.read()
+        parser = FlickrDwnldPgParser()
+        parser.feed(html)
+        url_thumbnails.append(parser.get_url())
+    print ' ...... done!'
 
-# Create the HTML output for JSSOR slides
-for n in range(len(url_large)):
-    jssor_div_output.write('    <div>\r\n')
-    jssor_div_output.write('        <a href=\"https://www.flickr.com/photos/schaazzz/'  + photo_ids[n] + '\"><img u=\"image\" src=\"' + url_large[n] + '\" /></a>\r\n')
-    jssor_div_output.write('        <div u=\"thumb\">\r\n')
-    jssor_div_output.write('            <div style=\"width: 100%; height: 100%; background-image: url(' + url_thumbnails[n] + '); background-position: center center; background-repeat: no-repeat; \">\r\n')
-    jssor_div_output.write('            </div>\r\n')
-    jssor_div_output.write('        </div>\r\n')
-    jssor_div_output.write('    </div>\r\n')
+    # Create the HTML output for JSSOR slides
+    for n in range(len(url_large)):
+        jssor_div_output.write('    <div>\r\n')
+        jssor_div_output.write('        <a href=\"https://www.flickr.com/photos/schaazzz/'  + photo_ids[n] + '\"><img u=\"image\" src=\"' + url_large[n] + '\" /></a>\r\n')
+        jssor_div_output.write('        <div u=\"thumb\">\r\n')
+        jssor_div_output.write('            <div style=\"width: 100%; height: 100%; background-image: url(' + url_thumbnails[n] + '); background-position: center center; background-repeat: no-repeat; \">\r\n')
+        jssor_div_output.write('            </div>\r\n')
+        jssor_div_output.write('        </div>\r\n')
+        jssor_div_output.write('    </div>\r\n')
 
-# Close the output file
-jssor_div_output.close()
-print '----------------------------------------------------------------\r\n'
+    # Close the output file
+    jssor_div_output.close()
+    print '----------------------------------------------------------------\r\n'
